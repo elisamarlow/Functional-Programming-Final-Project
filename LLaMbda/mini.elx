@@ -1,0 +1,15 @@
+SENTENCE : s.
+Awen     : np                = 'Awen'.
+Butor    : np                = 'Butor'.
+Céleste  : np                = 'Céleste'.
+Likes    : np \ (s / np)     = lambda x : lambda y : (x,y) in likes.
+Is       : np \ (s / adj)    = lambda x : lambda p : p(x).
+Happy    : adj               = lambda x : x in happy.
+Sad      : adj               = lambda x : x in sad.
+Confused : adj               = lambda x : x in confused.
+And      : s \ (s / s)       = lambda x : lambda y : x and y.
+And      : adj \ (adj / adj) = lambda p : lambda q : lambda x : p(x) and q(x).
+Everyone : s / (np \ s)      = lambda p : all (p(x) for x in people).
+Everyone : (s / np) \ s      = lambda p : all (p(x) for x in people).
+Someone  : s / (np \ s)      = lambda p : any (p(x) for x in people).
+Someone  : (s / np) \ s      = lambda p : any (p(x) for x in people).
