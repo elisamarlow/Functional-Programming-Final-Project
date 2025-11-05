@@ -11,8 +11,8 @@ splits (x:xs) = ([],x:xs) : [(x:ls,rs) | (ls,rs) <- splits xs]
 dec_rinv :: [LTp] -> LTp -> Bool
 dec_rinv gamma goal =
   case goal of
-    DivL b c -> dec_rinv (gamma ++ [b]) c
-    DivR c b -> dec_rinv ([b] ++ gamma) c
+    DivL b c -> dec_rinv ([b] ++ gamma) c
+    DivR c b -> dec_rinv (gamma ++ [b]) c
     Atm p    -> or [dec_lfoc left a right p | (left, a, right) <- focusSplits gamma]
   where
     focusSplits xs = [(l, a, r) | (l, (a:r)) <- splits xs]
