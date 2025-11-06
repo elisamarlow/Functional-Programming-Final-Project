@@ -1,57 +1,49 @@
 import Data.Char
 import System.IO
 import Control.Exception
+import Control.Monad (forM_)
 
 import LTypes
-import qualified Lambek
-
+import Lambek
 import Parser
 import PySupport
-
--- "standardize" the capitalization of a word by making the first
--- letter uppercase and the following letters lowercase.
--- (This will make it easier to look up words in the lexicon.)
+import LExp 
+-- Capitalization normalizer
 stdize (c:cs) = toUpper c : map toLower cs
 
--- read-eval-print-loop
+
 repl :: Lexicon PythonCode -> PythonHandle -> IO ()
 repl elx phandle = do
-  -- print the prompt
   putStr "> "
-  -- get a line of input
   line <- getLine
-  -- split it up into "standardized" words
   let ws = map stdize $ words line
-  -- putStrLn $ "Words: " ++ show ws  -- Commented out
-  
-  -- DEBUG: Comment out extensive debugging
-  -- putStrLn "=== DEBUG START ==="
-  -- Lambek.debugSentence elx ws
-  -- putStrLn "=== DEBUG END ==="
-  
-  -- test if the string of words is a grammatical sentence according to the lexicon
-  let (isGrammatical, derivations) = Lambek.checkSentence elx ws
-  -- putStrLn $ "Grammatical: " ++ show isGrammatical  -- Commented out
-  -- putStrLn $ "Number of derivations: " ++ show (length derivations)  -- Commented out
-  
-  if not isGrammatical
-    then putStrLn "That is not a well-formed sentence"
-    else do
-      putStrLn "I can derive your sentence as follows:"
-      mapM_ (\deriv -> putStrLn $ "   " ++ Lambek.prettyPrintDerivation deriv) derivations
-  -- repeat
+
+  let derivs = getAllDerivationsWithEnv elx ws
+
+  case derivs of
+    [] -> putStrLn "That is not a well-formed sentence"
+    [single] -> do
+      -- putStrLn "I can derive your sentence as follows:"
+      let (env, lexp) = single
+      -- putStrLn ("   " ++ prettyLExp lexp)
+      let pyExpr = interpretLExp env lexp
+      val <- runPythonCode phandle pyExpr
+      putStrLn val
+    many -> do
+      putStrLn "That sentence is ambiguous"
+      forM_ many $ \(env, lexp) -> do
+        let pyExpr = interpretLExp env lexp
+        val <- runPythonCode phandle pyExpr
+        putStrLn ("Sense [" ++ prettyLExp lexp ++ "]: " ++ val)
+
   repl elx phandle
-      
+
+
 main = do
-  -- send console output immediately to the user
   hSetBuffering stdout NoBuffering
-  -- input a lexicon file
   elx <- getLex
-  -- input a database of facts
-  db <- getDB
-  -- launch a Python interpreter
+  db  <- getDB
   phandle <- launchPython db
-  -- start the read-eval-print loop
   putStrLn "Starting chat..."
   repl elx phandle
   where
@@ -63,7 +55,7 @@ main = do
       case mdb of
         Left err -> putStrLn ("Error loading file " ++ show err) >> getDB
         Right db -> return (PCode db)
-      
+
     getLex :: IO (Lexicon PythonCode)
     getLex = do
       putStr "Lexicon file: "
