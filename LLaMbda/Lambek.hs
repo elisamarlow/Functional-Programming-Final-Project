@@ -68,13 +68,6 @@ der_lfoc gammaL (var, a) gammaR p =
         then [V var]
         else []
 
--- generate fresh variables: single letters 'a','b','c',... then 'a1','b1',...
-freshVars :: Int -> [String]
-freshVars n = take n $ names
-  where
-    letters = map (:[]) ['a'..'z']
-    names = letters ++ [ l ++ show i | i <- [1..], l <- letters ]
-
 
 getAllDerivations :: Lexicon sem -> [String] -> [LExp]
 getAllDerivations (Lexicon entries stype) ws =
