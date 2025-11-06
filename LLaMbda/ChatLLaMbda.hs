@@ -22,10 +22,23 @@ repl elx phandle = do
   line <- getLine
   -- split it up into "standardized" words
   let ws = map stdize $ words line
+  -- putStrLn $ "Words: " ++ show ws  -- Commented out
+  
+  -- DEBUG: Comment out extensive debugging
+  -- putStrLn "=== DEBUG START ==="
+  -- Lambek.debugSentence elx ws
+  -- putStrLn "=== DEBUG END ==="
+  
   -- test if the string of words is a grammatical sentence according to the lexicon
-  if Lambek.isGrammatical elx ws
-    then putStrLn "That is a well-formed sentence!"
-    else putStrLn "That is not a well-formed sentence"
+  let (isGrammatical, derivations) = Lambek.checkSentence elx ws
+  -- putStrLn $ "Grammatical: " ++ show isGrammatical  -- Commented out
+  -- putStrLn $ "Number of derivations: " ++ show (length derivations)  -- Commented out
+  
+  if not isGrammatical
+    then putStrLn "That is not a well-formed sentence"
+    else do
+      putStrLn "I can derive your sentence as follows:"
+      mapM_ (\deriv -> putStrLn $ "   " ++ Lambek.prettyPrintDerivation deriv) derivations
   -- repeat
   repl elx phandle
       
