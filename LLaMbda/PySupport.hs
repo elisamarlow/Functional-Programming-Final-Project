@@ -24,5 +24,6 @@ launchPython prelude = do
 runPythonCode :: PythonHandle -> PythonCode -> IO String
 runPythonCode (hin,hout,herr,ph) code = do
   hPutStrLn hin (text code)
+  -- hPutStrLn hin "import sys; sys.stdout.flush()" 
   aout <- hGetLine hout
   return aout
