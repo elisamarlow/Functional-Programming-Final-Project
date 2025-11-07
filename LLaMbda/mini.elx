@@ -23,3 +23,4 @@ Everyone : (s / np) \ s      = lambda p : all(p(x) for x in people).
 Someone  : s / (np \ s)      = lambda p : any(p(x) for x in people).
 Someone  : (s / np) \ s      = lambda p : any(p(x) for x in people).
 Who      : s / (np \ s)      = lambda p : [x for x in people if p(x)].
+Not      : adj / adj         = lambda p : (lambda x : not p(x)).

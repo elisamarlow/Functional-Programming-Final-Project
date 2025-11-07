@@ -28,7 +28,14 @@ repl elx phandle = do
       -- putStrLn ("   " ++ prettyLExp lexp)
       let pyExpr = interpretLExp env lexp
       val <- runPythonCode phandle pyExpr
-      putStrLn val
+      if not (null val) && head val == '[' then
+        if val == "[]" then
+          putStrLn "No one"
+        else
+          putStrLn (val)
+      else
+          putStrLn val
+
     many -> do
       putStrLn "That sentence is ambiguous"
       forM_ many $ \(env, lexp) -> do
